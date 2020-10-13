@@ -38,6 +38,10 @@ func (c *FakeCiliumV2) CiliumEndpoints(namespace string) v2.CiliumEndpointInterf
 	return &FakeCiliumEndpoints{c, namespace}
 }
 
+func (c *FakeCiliumV2) CiliumExternalWorkloads(namespace string) v2.CiliumExternalWorkloadInterface {
+	return &FakeCiliumExternalWorkloads{c, namespace}
+}
+
 func (c *FakeCiliumV2) CiliumIdentities() v2.CiliumIdentityInterface {
 	return &FakeCiliumIdentities{c}
 }
