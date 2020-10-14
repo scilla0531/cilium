@@ -57,6 +57,9 @@ const (
 	// CNCRDName is the full name of the CN CRD.
 	CNCRDName = k8sconstv2.CNKindDefinition + "/" + k8sconstv2.CustomResourceDefinitionVersion
 
+	// CEWCRDName is the full name of the CEW CRD.
+	CEWCRDName = k8sconstv2.CEWKindDefinition + "/" + k8sconstv2.CustomResourceDefinitionVersion
+
 	// CLRPCRDNAME is the full name of the CLRP CRD.
 	CLRPCRDNAME = k8sconstv2.CLRPKindDefinition + "/" + k8sconstv2.CustomResourceDefinitionVersion
 
@@ -90,6 +93,10 @@ func CreateCustomResourceDefinitions(clientset apiextensionsclient.Interface) er
 
 	g.Go(func() error {
 		return createNodeCRD(clientset)
+	})
+
+	g.Go(func() error {
+		return createCEWCRD(clientset)
 	})
 
 	if option.Config.IdentityAllocationMode == option.IdentityAllocationModeCRD {
@@ -132,6 +139,8 @@ func GetPregeneratedCRD(crdName string) apiextensionsv1.CustomResourceDefinition
 		crdBytes, err = examplesCrdsCiliumidentitiesYamlBytes()
 	case CNCRDName:
 		crdBytes, err = examplesCrdsCiliumnodesYamlBytes()
+	case CEWCRDName:
+		crdBytes, err = examplesCrdsCiliumexternalworkloadsYamlBytes()
 	case CLRPCRDNAME:
 		crdBytes, err = examplesCrdsCiliumlocalredirectpoliciesYamlBytes()
 	case CCLRPCRDNAME:
@@ -201,6 +210,19 @@ func createNodeCRD(clientset apiextensionsclient.Interface) error {
 		clientset,
 		CNCRDName,
 		constructV1CRD(k8sconstv2.CNName, ciliumCRD),
+		newDefaultPoller(),
+	)
+}
+
+// createCEWCRD creates and updates the CiliumExternalWorkload CRD. It should be called on
+// agent startup but is idempotent and safe to call again.
+func createCEWCRD(clientset apiextensionsclient.Interface) error {
+	ciliumCRD := GetPregeneratedCRD(CEWCRDName)
+
+	return createUpdateCRD(
+		clientset,
+		CEWCRDName,
+		constructV1CRD(k8sconstv2.CEWName, ciliumCRD),
 		newDefaultPoller(),
 	)
 }
